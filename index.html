@@ -79,12 +79,27 @@
     audio {
       display: none;
     }
+    #music-tip {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1rem;
+      opacity: 0.6;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
   </style>
 </head>
 <body>
   <div class="scene">
     <div class="stars"></div>
     <div id="text-layers"></div>
+    <div id="music-tip">Tap sekali untuk mulai musik 🎵</div>
   </div>
   <audio id="bg-music" loop>
     <source src="music/Happiness.mp3" type="audio/mpeg" />
@@ -105,7 +120,7 @@
 
     const textLayers = document.getElementById('text-layers');
     const messages = ['❤️', 'I love you so much'];
-    const imagePaths = Array.from({ length: 12 }, (_, i) => `images/${i + 1}.jpeg`);
+    const imagePaths = Array.from({ length: 12 }, (_, i) => `images/${i + 1}.jpg`);
 
     const layer = document.createElement('div');
     layer.className = 'text-layer';
@@ -155,6 +170,24 @@
       targetY = (e.clientY / window.innerHeight - 0.5) * 30;
     });
 
+    // Tambahan dukungan untuk HP (device orientation dan touchmove)
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', (event) => {
+        const beta = event.beta || 0;
+        const gamma = event.gamma || 0;
+        targetX = gamma / 2;
+        targetY = beta / 3;
+      });
+    }
+
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        targetX = (touch.clientX / window.innerWidth - 0.5) * 30;
+        targetY = (touch.clientY / window.innerHeight - 0.5) * 30;
+      }
+    });
+
     function animate3D() {
       currentX += (targetX - currentX) * 0.05;
       currentY += (targetY - currentY) * 0.05;
@@ -163,13 +196,14 @@
     }
     animate3D();
 
-    // Play music after user interacts once
     let musicPlayed = false;
     function playMusicOnce() {
       if (!musicPlayed) {
         const audio = document.getElementById('bg-music');
         audio.play().catch(err => console.log('Autoplay blocked:', err));
         musicPlayed = true;
+        const tip = document.getElementById('music-tip');
+        if (tip) tip.style.display = 'none';
       }
     }
     window.addEventListener('click', playMusicOnce);
