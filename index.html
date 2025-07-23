@@ -170,7 +170,6 @@
       targetY = (e.clientY / window.innerHeight - 0.5) * 30;
     });
 
-    // Tambahan dukungan untuk HP (device orientation dan touchmove)
     if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', (event) => {
         const beta = event.beta || 0;
@@ -200,10 +199,14 @@
     function playMusicOnce() {
       if (!musicPlayed) {
         const audio = document.getElementById('bg-music');
-        audio.play().catch(err => console.log('Autoplay blocked:', err));
-        musicPlayed = true;
-        const tip = document.getElementById('music-tip');
-        if (tip) tip.style.display = 'none';
+        audio.load(); // Tambahan penting agar browser tahu audio siap
+        audio.play().then(() => {
+          musicPlayed = true;
+          const tip = document.getElementById('music-tip');
+          if (tip) tip.style.display = 'none';
+        }).catch(err => {
+          console.log('Autoplay blocked:', err);
+        });
       }
     }
     window.addEventListener('click', playMusicOnce);
