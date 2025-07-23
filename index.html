@@ -199,7 +199,6 @@
     function playMusicOnce() {
       if (!musicPlayed) {
         const audio = document.getElementById('bg-music');
-        audio.load(); // Tambahan penting agar browser tahu audio siap
         audio.play().then(() => {
           musicPlayed = true;
           const tip = document.getElementById('music-tip');
